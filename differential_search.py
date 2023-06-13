@@ -45,7 +45,7 @@ def delta_worker(args):
 	return delta_worker_list
 
 @timeit(display_args=False)
-def delta(processes: int = None, chunksize: int = 1):
+def delta(processes: int = None, step_size: int = 1000, chunksize: int = 1):
 	differentials = {}
 	if os.path.exists('f.txt'):
 		with open('f.txt', 'r') as file:
@@ -59,7 +59,7 @@ def delta(processes: int = None, chunksize: int = 1):
 		i = 0
 		if not processes:
 			processes = mp.cpu_count()-2
-		start_end_window_4_args = [(ai_start, ai_end, bi_start, bi_end) for ai_start, ai_end in calc_range_window(0, 1 << 16, 1000) for bi_start, bi_end in calc_range_window(0, 1 << 16, 1000)]
+		start_end_window_4_args = [(ai_start, ai_end, bi_start, bi_end) for ai_start, ai_end in calc_range_window(0, 1 << 16, step_size) for bi_start, bi_end in calc_range_window(0, 1 << 16, step_size)]
 		with mp.Pool(processes=processes) as pool:
 			for result in pool.imap(delta_worker, start_end_window_4_args, chunksize=chunksize):
 				for r in result:
@@ -87,7 +87,7 @@ def differential_search(alpha, diffs, q = 0.00008, r = 6):
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(
-		description="Hmmmm..."
+		description="Calculation of the table of differential probabilities of a round transformation."
 	)
 	 
 	parser.add_argument(
@@ -95,9 +95,12 @@ if __name__ == "__main__":
 	)
 
 	parser.add_argument(
-		"--step-size", type=int, help="Stop search of L at this value", default=100000
+		"--step-size", type=int, help="Length of intervals into which the range will be split.", default=100000
 	)
 
+	parser.add_argument(
+		"--chunksize", type=int, help="Keyword argument that can be used to specify the size of chunks in which to process input data when using the pool.imap() function. This can be useful for improving performance when processing large amounts of data.", default=100000
+	)
 	args = parser.parse_args()
-	differentials = delta(processes=10, chunksize=2000)
+	differentials = delta(processes=args.processes, step_size = args.step_size, chunksize=args.chunksize)
 	
