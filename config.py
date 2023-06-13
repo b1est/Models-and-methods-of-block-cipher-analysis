@@ -10,7 +10,7 @@ class Singleton(object):
 
 
 class Config(Singleton):
-	s_block :  list
-	s_block_rev: list
+	s_block :  list = [10, 9, 13, 6, 14, 11, 4, 5, 15, 1, 3, 12, 7, 0, 8, 2]
+	s_block_rev: list = [13, 9, 15, 10, 6, 7, 3, 12, 14, 1, 0, 5, 11, 2, 4, 8]
 	diff_probs_table_s: np.ndarray
 	
