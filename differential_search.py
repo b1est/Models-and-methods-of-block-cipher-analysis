@@ -124,7 +124,8 @@ def get_dp(differentials, processes = 10):
                 r = pool.apply_async(get_dp_worker, [chunk, differentials])
                 sub_processes.append(r)
             for sp in sub_processes:
-                difs_dict.update(sp.get())
+                if sp.get() != None:
+                    difs_dict.update(sp.get())
         with open('dp.pkl', 'wb') as file:
            pickle.dump(difs_dict, file)
     return difs_dict
