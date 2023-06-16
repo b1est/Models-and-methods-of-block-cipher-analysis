@@ -101,19 +101,17 @@ def get_dp_worker(alpha_lst, diff):
         if difs != {}:
             for b in difs:
                 diff_cand_dict[(alpha, b)] = tuple(difs)
-                with open('dp.pkl', 'ab') as file:
-                    pickle.dump(diff_cand_dict, file)
     return diff_cand_dict
 
 @timeit(display_args=False)
 def get_dp(differentials, processes = 10):
     if os.path.exists('dp.pkl'):
         with open('dp.pkl', 'rb') as file:
-           difs_list = pickle.load(file)
+           difs_dict = pickle.load(file)
     else:
         alpha_array = [alpha[1] for alpha in [([alpha >> 4 * i & 0xf for i in range(4)], alpha) for alpha in range(1, 1 << 16)] if alpha[0].count(0)>=3]
         alpha_array_chunks = chunk_list(alpha_array, processes)
-        difs_list = {}
+        difs_dict = {}
         sub_processes = []
         with mp.Pool(processes=processes) as pool:
         # for alpha in alpha_array:
@@ -126,8 +124,10 @@ def get_dp(differentials, processes = 10):
                 r = pool.apply_async(get_dp_worker, [chunk, differentials])
                 sub_processes.append(r)
             for sp in sub_processes:
-                difs_list.update(sp.get())
-    return difs_list
+                difs_dict.update(sp.get())
+        with open('dp.pkl', 'wb') as file:
+           pickle.dump(difs_dict, file)
+    return difs_dict
 
 
 
