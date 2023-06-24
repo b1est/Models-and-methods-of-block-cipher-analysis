@@ -1,17 +1,6 @@
 import time
 from functools import wraps
 import logging
-import ast
-
-
-def calc_range_window(range_start, range_end, step):
-	start = range_start
-	while start < range_end:
-		end = start + step
-		if end > range_end:
-			end = range_end
-		yield start, end
-		start = end + 1
 
 def timeit(display_args):
 	def decorator(func):
@@ -32,17 +21,3 @@ def timeit(display_args):
 		return timeit_wrapper
 
 	return decorator
-
-
-def chunk_list(lst, chunk_size):
-    return [lst[i:i + chunk_size] for i in range(0, len(lst), chunk_size)]
-
-def fastest_reader(filename = 'f.txt'):
-	i = 0
-	differentials = {}
-	with open(filename) as file:
-		for line in file:
-			differentials.update({i: dict(ast.literal_eval(line))})
-			i+=1
-	differentials = list(map(lambda x: (x[0], list(x[1].items())), differentials.items()))
-	return differentials
