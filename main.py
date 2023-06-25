@@ -150,6 +150,6 @@ if __name__ == '__main__':
         maximum_frequency_keys.sort()
 
         logging.info(f'Iteration: {iteration+1}/nKeys with max frequency: {maximum_frequency_keys}/n---------------------------')
-        print(f'Iteration: {iteration}/nKeys with max frequency: {maximum_frequency_keys}/n---------------------------')
+        print(f'Iteration: {iteration+1}/nKeys with max frequency: {maximum_frequency_keys}/n---------------------------')
         if  len(maximum_frequency_keys) == 1:
             break
