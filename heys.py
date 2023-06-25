@@ -1,9 +1,9 @@
 class HeysCipher:
     def __init__(self, s_block: list, s_block_rev: list, keys: int or list = 0, rounds = 6):
+        self.rounds = rounds
         self.keys = self.expand_key(keys)
         self.s_block = s_block
         self.s_block_rev = s_block_rev
-        self.rounds = rounds
 
     def S(self, x: int, encrypt: bool = True) -> int:
         s = []
@@ -22,7 +22,7 @@ class HeysCipher:
             return key
         else:
             round_keys = []
-            for i in range(7):
+            for i in range(self.rounds+1):
                 round_key = key & 0xFFFF
                 round_keys.append(round_key)
                 key >>= 16
