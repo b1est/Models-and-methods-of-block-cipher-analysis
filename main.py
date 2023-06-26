@@ -21,14 +21,14 @@ config = Config()
 @timeit(display_args=True)
 def linsearch_worker(alpha):
     save_file = Path(f'./saves/approximations/{alpha}.pkl')
-    differentials = []
-    differentials_alpha = linsearch(alpha)
-    if differentials_alpha != {}:
-        for beta in differentials_alpha:
-                differentials.append(((alpha, beta), differentials_alpha[beta]))
+    approximations = []
+    approximations_alpha = linsearch(alpha)
+    if approximations_alpha != {}:
+        for beta in approximations_alpha:
+                approximations.append(((alpha, beta), approximations_alpha[beta]))
         with open(save_file, 'wb') as file:
-            pickle.dump(differentials, file)
-    return differentials
+            pickle.dump(approximations, file)
+    return approximations
 
 def create_statistical_materials(text_quantity):
     for text in range(text_quantity):
@@ -94,9 +94,9 @@ if __name__ == '__main__':
             num_processes = len(alpha_array)
 
         with Pool(processes=num_processes) as pool:
-            for alpha_diff_search_res in pool.map(linsearch_worker, alpha_array):
-                if alpha_diff_search_res != []:
-                    for ri in alpha_diff_search_res:
+            for alpha_lin_search_res in pool.map(linsearch_worker, alpha_array):
+                if alpha_lin_search_res != []:
+                    for ri in alpha_lin_search_res:
                         approximations.append(ri)
 
         with open(Path(f'./saves/approximations/all.pkl'), 'wb') as f:
