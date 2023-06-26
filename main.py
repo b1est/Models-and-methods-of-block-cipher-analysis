@@ -74,9 +74,8 @@ def m2(args):
             else:
                 u_k -= 1
             keys[k] = abs(u_k)
-    keys_ind_max = sorted(keys, reverse = True)
-    keys_res = [(k, keys[k]) for k in keys_ind_max]
-    return keys_res[:100]
+    keys = [k for k in sorted(keys, reverse = True)]
+    return keys[:100]
 
     
 
@@ -116,16 +115,17 @@ if __name__ == '__main__':
     approximations = sorted(approximations, key = lambda x: x[1], reverse = True)
     texts = create_statistical_materials(config.texts)
     num_processes = cpu_count() - 4
-    for ab, p in approximations:
-        args =[(ab[0], ab[1], texts)]
-        with Pool(processes=num_processes) as pool:
-            keys = pool.map(m2, args)
+    keys = {}
+    args =[(ab[0], ab[1], texts) for ab, p in approximations]
+    with Pool(processes=num_processes) as pool:
+        res = pool.map(m2, args)
 
-    for weight in keys:
-        for k_i in weight:
-            keys[k_i] += 1
-    stat, keys = zip(*sorted(zip(keys, range(2**16)), reverse = True))
+    for k in res:
+        for ki in k:
+            if ki in keys:
+                keys[ki] += 1
+            else:
+                keys[ki] = 1
     
-    
-    for i in range(10):
-        print(keys[i], stat[i])
+    for k, v in dict(Counter(keys).most_common(10)):       # dict(sorted(keys.items(), key=operator.itemgetter(1), reverse=True)[:10]).items():
+        print(f'key = {k}\nstat = {v}')
