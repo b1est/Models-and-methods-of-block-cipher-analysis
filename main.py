@@ -31,24 +31,24 @@ def linsearch_worker(alpha):
     return differentials
 
 def create_statistical_materials(text_quantity):
-    # for text in range(text_quantity):
-    #     input_file = Path(f'./saves/materials/pt_{text}.bin')
-    #     output_file = Path(f'./saves/materials/ct_{text}.bin')
+    for text in range(text_quantity):
+        input_file = Path(f'./saves/materials/pt_{text}.bin')
+        output_file = Path(f'./saves/materials/ct_{text}.bin')
 
 
-    #     with open(input_file, 'wb') as file:
-    #         file.write(int(text).to_bytes(2, 'little'))
+        with open(input_file, 'wb') as file:
+            file.write(int(text).to_bytes(2, 'little'))
         
         
-    #     if sys.platform == "linux" or sys.platform == "linux2":
-    #         os.system('chmod +x heys.bin')
-    #         os.system(f'./heys.bin e 01 {input_file} {output_file}')
-    #     elif sys.platform == "darwin":
-    #         os.system('chmod +x heys.bin')
-    #         os.system(f'./heys.bin e 01 {input_file} {output_file}')
-    #     elif sys.platform == "win32":
-    #         Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE).communicate('\n'.encode())
-    #         os.system(f"Heys e 01 {input_file} {output_file}")
+        if sys.platform == "linux" or sys.platform == "linux2":
+            os.system('chmod +x heys.bin')
+            os.system(f'./heys.bin e 01 {input_file} {output_file}')
+        elif sys.platform == "darwin":
+            os.system('chmod +x heys.bin')
+            os.system(f'./heys.bin e 01 {input_file} {output_file}')
+        elif sys.platform == "win32":
+            Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE).communicate('\n'.encode())
+            os.system(f"Heys e 01 {input_file} {output_file}")
     
     texts = read(text_quantity)
     return texts
