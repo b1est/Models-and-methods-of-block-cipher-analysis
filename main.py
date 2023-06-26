@@ -20,7 +20,7 @@ config = Config()
 
 @timeit(display_args=True)
 def linsearch_worker(alpha):
-    save_file = Path(f'./saves/differentials/{alpha}.pkl')
+    save_file = Path(f'./saves/approximations/{alpha}.pkl')
     differentials = []
     differentials_alpha = linsearch(alpha)
     if differentials_alpha != {}:
@@ -41,13 +41,11 @@ def create_statistical_materials(text_quantity):
         
         
         if sys.platform == "linux" or sys.platform == "linux2":
-            os.system('chmod +x heys.bin')
-            os.system(f'./heys.bin e 01 {input_file} {output_file}')
+            Popen(f"./heys.bin e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate()
         elif sys.platform == "darwin":
-            os.system('chmod +x heys.bin')
-            os.system(f'./heys.bin e 01 {input_file} {output_file}')
+            Popen(f"./heys.bin e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate()
         elif sys.platform == "win32":
-            Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE).communicate('\n'.encode())
+            Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate('\n'.encode())
     
     texts = read(text_quantity)
     return texts
@@ -80,7 +78,8 @@ def m2(args):
 
 if __name__ == '__main__':
     keys_m2 = Manager().list()
-
+    if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
+        os.system('chmod +x heys.bin')
     if not os.listdir(Path('./saves/approximations')):
         approximations = []
         alpha_array = [alpha[1] for alpha in [([alpha >> 4 * i & 0xf for i in range(4)], alpha) for alpha in range(1, 1 << 16)] if alpha[0].count(0)>=3]
