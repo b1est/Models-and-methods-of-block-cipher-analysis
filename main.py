@@ -125,6 +125,7 @@ if __name__ == '__main__':
                 keys[ki] += 1
             else:
                 keys[ki] = 1
-    
-    for k, v in dict(Counter(keys).most_common(10)):       # dict(sorted(keys.items(), key=operator.itemgetter(1), reverse=True)[:10]).items():
+    keys = dict(Counter(keys).most_common(10))
+    logging.info(keys)
+    for k, v in keys.items():       # dict(sorted(keys.items(), key=operator.itemgetter(1), reverse=True)[:10]).items():
         print(f'key = {k}\nstat = {v}')
