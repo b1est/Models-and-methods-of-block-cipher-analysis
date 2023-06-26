@@ -74,7 +74,7 @@ def m2(args):
             else:
                 u_k -= 1
             keys[k] = abs(u_k)
-    keys_ind = sorted(keys, reverse = True)
+    keys = sorted(keys, reverse = True)
     return keys[:100]
 
     
@@ -119,29 +119,12 @@ if __name__ == '__main__':
         args =[(ab[0], ab[1], texts)]
         with Pool(processes=num_processes) as pool:
             keys = pool.map(m2, args)
+
+    for mass in keys:
+        for k_i in mass:
+            keys[k_i] += 1
+    stat, keys = zip(*sorted(zip(keys, range(2**16)), reverse = True))
     
-        # maximum_frequency_keys = []
-        # for k,v in keys.items():
-        #     if v == max(keys.values()):
-        #         maximum_frequency_keys.append(k)
-
-    # num_processes = cpu_count() - 4
-    # 
-    #     alpha, beta = ab
-    #     create_statistical_materials(config.texts, alpha)
-    #     texts, muted = read(config.texts, alpha)
-    #     args = [(texts, muted, beta, k, keys) for  k in config.keys]
-    #     with Pool(processes=num_processes) as pool:
-    #         pool.map(last_round_attack, args)
-        
-    #     maximum_frequency_keys = []
-    #     for k,v in keys.items():
-    #         if v == max(keys.values()):
-    #             maximum_frequency_keys.append(k)
-
-    #     maximum_frequency_keys.sort()
-
-    #     logging.info(f'Iteration: {iteration+1}/nKeys with max frequency: {maximum_frequency_keys}/n---------------------------')
-    #     print(f'Iteration: {iteration+1}/nKeys with max frequency: {maximum_frequency_keys}/n---------------------------')
-    #     if  len(maximum_frequency_keys) == 1:
-    #         break
+    
+    for i in range(10):
+        print(keys[i], stat[i])
