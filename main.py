@@ -74,8 +74,9 @@ def m2(args):
             else:
                 u_k -= 1
             keys[k] = abs(u_k)
-    keys = sorted(keys, reverse = True)
-    return keys[:100]
+    keys_ind_max = sorted(keys, reverse = True)
+    keys_res = [(k, keys[k]) for k in keys_ind_max]
+    return keys_res[:100]
 
     
 
@@ -120,8 +121,8 @@ if __name__ == '__main__':
         with Pool(processes=num_processes) as pool:
             keys = pool.map(m2, args)
 
-    for mass in keys:
-        for k_i in mass:
+    for weight in keys:
+        for k_i in weight:
             keys[k_i] += 1
     stat, keys = zip(*sorted(zip(keys, range(2**16)), reverse = True))
     
