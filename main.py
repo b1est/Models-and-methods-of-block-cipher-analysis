@@ -48,7 +48,6 @@ def create_statistical_materials(text_quantity):
             os.system(f'./heys.bin e 01 {input_file} {output_file}')
         elif sys.platform == "win32":
             Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE).communicate('\n'.encode())
-            os.system(f"Heys e 01 {input_file} {output_file}")
     
     texts = read(text_quantity)
     return texts
@@ -64,7 +63,7 @@ def read(text_quantity):
 @timeit(display_args=False)
 def m2(args):
     keys = {}
-    alpha, beta, texts = args
+    alpha, beta, texts, keys_m2 = args
     for k in range(1 << 16):
         u_k = 0
         for x, y in texts:
@@ -75,12 +74,12 @@ def m2(args):
                 u_k -= 1
             keys[k] = abs(u_k)
     keys = [k for k in sorted(keys, reverse = True)]
-    return keys[:100]
+    keys_m2.append(keys[:100])
 
     
 
 if __name__ == '__main__':
-    keys = Manager().dict()
+    keys_m2 = Manager().list()
 
     if not os.listdir(Path('./saves/approximations')):
         approximations = []
@@ -116,11 +115,11 @@ if __name__ == '__main__':
     texts = create_statistical_materials(config.texts)
     num_processes = cpu_count() - 4
     keys = {}
-    args =[(ab[0], ab[1], texts) for ab, p in approximations]
+    args =[(ab[0], ab[1], texts, keys_m2) for ab, p in approximations]
     with Pool(processes=num_processes) as pool:
-        res = pool.map(m2, args)
+        pool.map(m2, args)
 
-    for k in res:
+    for k in keys_m2:
         for ki in k:
             if ki in keys:
                 keys[ki] += 1
