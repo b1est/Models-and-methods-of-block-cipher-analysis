@@ -78,9 +78,9 @@ def m2(args):
 
 if __name__ == '__main__':
     keys_m2 = Manager().list()
-    if not os.listdir(Path('./saves/approximations')):
+    if not Path('./saves/approximations').is_dir():
         Path("./saves/approximations").mkdir(parents=True)
-    if not os.listdir(Path('./saves/materials')):
+    if not Path('./saves/materials').is_dir():
         Path("./saves/materials").mkdir(parents=True)
     if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
         os.system('chmod +x heys.bin')
