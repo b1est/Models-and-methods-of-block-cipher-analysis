@@ -38,11 +38,9 @@ def linear_approximations_search(alpha, r = 6, p = 0.00001):
     for t in range(1, r):
         GammaIndex = {}
         for bi in Gamma[t-1]:
-            lp = LPs.get(bi, LP_a(bi))
-            LPs[bi] = lp
-            p_i = Gamma[t-1][bi]
-            for pp in lp:
-                GammaIndex[pp] = GammaIndex.get(pp, 0) + lp[pp] * p_i
-        
+            LP = LPs.get(bi, LP_a(bi))
+            LPs[bi] = LP
+            for pp in LP:
+                GammaIndex[pp] = GammaIndex.get(pp, 0) + LP[pp] * Gamma[t-1][bi]
         Gamma[t].update({HeysCipher(config.s_block, config.s_block_rev).L(beta): GammaIndex[beta] for beta in GammaIndex if GammaIndex[beta] > p})
     return Gamma[-1]
