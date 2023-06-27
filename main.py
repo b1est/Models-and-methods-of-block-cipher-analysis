@@ -10,7 +10,6 @@ from pathlib import Path
 from linear_approximations_search import linear_approximations_search as linsearch
 from linear_approximations_search import scalar_mul as mul
 from subprocess import Popen, PIPE 
-import numpy as np
 import operator
 
 logging.basicConfig(filename='lab_logs.log', format='%(message)s', level=logging.INFO)
@@ -84,7 +83,6 @@ if __name__ == '__main__':
     if not os.listdir(Path('./saves/approximations')):
         approximations = []
         alpha_array = [alpha[1] for alpha in [([alpha >> 4 * i & 0xf for i in range(4)], alpha) for alpha in range(1, 1 << 16)] if alpha[0].count(0)>=3]
-
         if len(alpha_array) >= cpu_count():
             num_processes = cpu_count() - 2
         else:
@@ -112,6 +110,7 @@ if __name__ == '__main__':
                     pickle.dump(approximations, f)
     
     approximations = sorted(approximations, key = lambda x: x[1], reverse = True)
+    print(approximations)
     appr_list_ab = [(ab[0], ab[1]) for ab, p in approximations]
     if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
         create_statistical_materials(config.texts)

@@ -1,6 +1,3 @@
-import numpy as np
-from pathlib import Path
-
 class Singleton(object):
 	_instance = None
 
