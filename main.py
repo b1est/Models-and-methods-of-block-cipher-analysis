@@ -11,6 +11,7 @@ from linear_approximations_search import linear_approximations_search as linsear
 from linear_approximations_search import scalar_mul as mul
 from subprocess import Popen, PIPE 
 import numpy as np
+import operator
 
 logging.basicConfig(filename='lab_logs.log', format='%(message)s', level=logging.INFO)
 
@@ -46,10 +47,6 @@ def create_statistical_materials(text_quantity):
             Popen(f"./heys.bin e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate()
         elif sys.platform == "win32":
             Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate('\n'.encode())
-    
-    texts = read(text_quantity)
-    return texts
-    
 
 def read(text_quantity):
     texts = [(int.from_bytes(open(f'./saves/materials/pt_{text}.bin', 'rb').read(), 'little'), int.from_bytes(open(f'./saves/materials/ct_{text}.bin', 'rb').read(), 'little')) for text in range(text_quantity)]
@@ -61,7 +58,8 @@ def read(text_quantity):
 @timeit(display_args=False)
 def m2(args):
     keys = {}
-    alpha, beta, texts, keys_m2 = args
+    alpha, beta = args
+    texts = read(config.texts)
     for k in range(1 << 16):
         u_k = 0
         for x, y in texts:
@@ -71,13 +69,12 @@ def m2(args):
             else:
                 u_k -= 1
             keys[k] = abs(u_k)
-    keys = [k for k in sorted(keys, reverse = True)]
-    keys_m2.append(keys[:100])
+    keys = [k for k, v in tuple(sorted(keys.items(), key=operator.itemgetter(1), reverse = True))[:100]]
+    keys_m2.append(keys)
 
     
 
 if __name__ == '__main__':
-    keys_m2 = Manager().list()
     if not Path('./saves/approximations').is_dir():
         Path("./saves/approximations").mkdir(parents=True)
     if not Path('./saves/materials').is_dir():
@@ -115,13 +112,24 @@ if __name__ == '__main__':
                     pickle.dump(approximations, f)
     
     approximations = sorted(approximations, key = lambda x: x[1], reverse = True)
-    texts = create_statistical_materials(config.texts)
+    appr_list_ab = [(ab[0], ab[1]) for ab, p in approximations]
+    if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
+        create_statistical_materials(config.texts)
     num_processes = cpu_count() - 4
+    
+    
+    if not Path('./saves/keys_m2.pkl').exists():
+        keys_m2 = Manager().list()
+        with Pool(processes=num_processes) as pool:
+            pool.map(m2, appr_list_ab[:50])
+        
+        with open(Path('./saves/keys_m2.pkl'), 'wb') as f:
+            pickle.dump(keys_m2, f)
+    else:
+        with open(Path('./saves/keys_m2.pkl'), 'rb') as f:
+            keys_m2 = pickle.load(f)
+            
     keys = {}
-    args =[(ab[0], ab[1], texts, keys_m2) for ab, p in approximations]
-    with Pool(processes=num_processes) as pool:
-        pool.map(m2, args)
-
     for k in keys_m2:
         for ki in k:
             if ki in keys:
