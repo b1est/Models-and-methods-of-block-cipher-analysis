@@ -99,7 +99,10 @@ def last_round_attack(args):
 
 if __name__ == '__main__':
     keys = Manager().dict()
-
+    if not Path('./saves/differentials').is_dir():
+        Path("./saves/differentials").mkdir(parents=True)
+    if not Path('./saves/materials').is_dir():
+        Path("./saves/materials").mkdir(parents=True)
     if not os.listdir(Path('./saves/differentials')):
         differentials = []
         alpha_array = [alpha[1] for alpha in [([alpha >> 4 * i & 0xf for i in range(4)], alpha) for alpha in range(1, 1 << 16)] if alpha[0].count(0)>=3]
