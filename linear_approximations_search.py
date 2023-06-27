@@ -18,16 +18,14 @@ def get_linear_approximations():
 
 def LP_a(alpha):
     lp = get_linear_approximations()
-    a = [(alpha >> 4 * i) & 15 for i in range(4)]
+    a = [(alpha >> 4 * i) & 0xf for i in range(4)]
     beta = [np.where(lp[a[i]] != 0)[0] for i in range(4)]
-   
-    lpa = {}
+    lpa = dict()
     for b1 in beta[0]:
         for b2 in beta[1]:
             for b3 in beta[2]:
                 for b4 in beta[3]:
                     lpa[b4 + (b3 << 4) + (b2 << 8) + (b1 << 12)] = lp[b1][a[0]] * lp[b2][a[1]] * lp[b3][a[2]] * lp[b4][a[3]]
-
     return lpa
  
 @timeit(display_args=True)
@@ -36,11 +34,10 @@ def linear_approximations_search(alpha, r = 6, p = 0.00001):
     Gamma[0].update({alpha : 1})
     LPs = dict()
     for t in range(1, r):
-        GammaIndex = {}
+        GammaIndex = dict()
         for bi in Gamma[t-1]:
-            LP = LPs.get(bi, LP_a(bi))
-            LPs[bi] = LP
-            for pp in LP:
-                GammaIndex[pp] = GammaIndex.get(pp, 0) + LP[pp] * Gamma[t-1][bi]
+            LPs[bi] = LPs.get(bi, LP_a(bi))
+            for pp in LPs[bi]:
+                GammaIndex[pp] = GammaIndex.get(pp, 0) + LPs[bi][pp] * Gamma[t-1][bi]
         Gamma[t].update({HeysCipher(config.s_block, config.s_block_rev).L(beta): GammaIndex[beta] for beta in GammaIndex if GammaIndex[beta] > p})
     return Gamma[-1]

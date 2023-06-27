@@ -6,7 +6,7 @@ class HeysCipher:
         self.s_block_rev = s_block_rev
 
     def S(self, x: int, encrypt: bool = True) -> int:
-        s = []
+        s = list()
         new_x = 0
         for i in range(4):
             si = x & 0xF
@@ -21,7 +21,7 @@ class HeysCipher:
         if isinstance(key, list):
             return key
         else:
-            round_keys = []
+            round_keys = list()
             for i in range(self.rounds+1):
                 round_key = key & 0xFFFF
                 round_keys.append(round_key)

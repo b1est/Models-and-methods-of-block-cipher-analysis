@@ -21,7 +21,7 @@ config = Config()
 @timeit(display_args=True)
 def linsearch_worker(alpha):
     save_file = Path(f'./saves/approximations/{alpha}.pkl')
-    approximations = []
+    approximations = list()
     approximations_alpha = linsearch(alpha)
     if approximations_alpha != {}:
         for beta in approximations_alpha:
@@ -56,9 +56,8 @@ def read(text_quantity):
 
 @timeit(display_args=False)
 def m2(args):
-    keys = {}
+    keys = dict()
     alpha, beta = args
-    texts = read(config.texts)
     for k in range(1 << 16):
         u_k = 0
         for x, y in texts:
@@ -81,7 +80,7 @@ if __name__ == '__main__':
     if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
         os.system('chmod +x heys.bin')
     if not os.listdir(Path('./saves/approximations')):
-        approximations = []
+        approximations = list()
         alpha_array = [alpha[1] for alpha in [([alpha >> 4 * i & 0xf for i in range(4)], alpha) for alpha in range(1, 1 << 16)] if alpha[0].count(0)>=3]
         if len(alpha_array) >= cpu_count():
             num_processes = cpu_count() - 2
@@ -101,7 +100,7 @@ if __name__ == '__main__':
             with open(f'./saves/approximations/all.pkl', 'rb') as f:
                 approximations = pickle.load(f)
         else:
-            approximations = []
+            approximations = list()
             for filename in os.listdir(Path('./saves/approximations/')):
                 with open(Path(f'./saves/approximations/{filename}'), 'rb') as f:
                     for ri in pickle.load(f): 
@@ -110,17 +109,23 @@ if __name__ == '__main__':
                     pickle.dump(approximations, f)
     
     approximations = sorted(approximations, key = lambda x: x[1], reverse = True)
-    print(approximations)
+    
+    if len(approximations) > 300:
+        approximations = approximations[:300]
+        
     appr_list_ab = [(ab[0], ab[1]) for ab, p in approximations]
+
     if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
         create_statistical_materials(config.texts)
+    
+    texts = Manager().list(read(config.texts))
     num_processes = cpu_count() - 4
     
     
     if not Path('./saves/keys_m2.pkl').exists():
         keys_m2 = Manager().list()
         with Pool(processes=num_processes) as pool:
-            pool.map(m2, appr_list_ab[:50])
+            pool.map(m2, appr_list_ab)
         
         with open(Path('./saves/keys_m2.pkl'), 'wb') as f:
             pickle.dump(keys_m2, f)
@@ -128,7 +133,7 @@ if __name__ == '__main__':
         with open(Path('./saves/keys_m2.pkl'), 'rb') as f:
             keys_m2 = pickle.load(f)
             
-    keys = {}
+    keys = dict()
     for k in keys_m2:
         for ki in k:
             if ki in keys:
@@ -139,3 +144,4 @@ if __name__ == '__main__':
     logging.info(keys)
     for k, v in keys.items():       # dict(sorted(keys.items(), key=operator.itemgetter(1), reverse=True)[:10]).items():
         print(f'key = {k}\nstat = {v}')
+        logging.info(f'key = {k}\nstat = {v}')
