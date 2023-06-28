@@ -121,9 +121,9 @@ if __name__ == '__main__':
     
     num_processes = cpu_count() - 2
     
-    
+    keys_m2 = Manager().list()
     if not Path('./saves/keys_m2.pkl').exists():
-        keys_m2 = Manager().list()
+        
         with Pool(processes=num_processes) as pool:
             pool.map(m2, appr_list_ab)
         
@@ -131,8 +131,10 @@ if __name__ == '__main__':
             pickle.dump(keys_m2, f)
     else:
         with open(Path('./saves/keys_m2.pkl'), 'rb') as f:
-            keys_m2 = pickle.load(f)
-            
+            data = pickle.load(f)
+        keys_m2 = list()
+        keys_m2 = data
+        
     keys = dict()
     for k in keys_m2:
         for ki in k:
