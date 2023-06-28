@@ -57,11 +57,10 @@ def read(text_quantity):
 @timeit(display_args=False)
 def m2(args):
     keys = dict()
-    texts = read(config.texts)
     alpha, beta = args
     for k in range(1 << 16):
         u_k = 0
-        for x, y in texts:
+        for x, y in T:
             x1 = HeysCipher(config.s_block, config.s_block_rev).round(x, k)
             if mul(alpha, x1)^mul(beta, y) == 0:
                 u_k += 1
@@ -118,10 +117,12 @@ if __name__ == '__main__':
 
     if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
         create_statistical_materials(config.texts)
+    texts = read(config.texts)
     
-    num_processes = cpu_count() - 2
+    num_processes = cpu_count()-2
     
     keys_m2 = Manager().list()
+    T = Manager().list(texts)
     if not Path('./saves/keys_m2.pkl').exists():
         
         with Pool(processes=num_processes) as pool:
