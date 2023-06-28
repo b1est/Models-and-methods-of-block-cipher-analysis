@@ -119,7 +119,7 @@ if __name__ == '__main__':
     if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
         create_statistical_materials(config.texts)
     
-    num_processes = cpu_count() - 4
+    num_processes = cpu_count() - 2
     
     
     if not Path('./saves/keys_m2.pkl').exists():
@@ -140,7 +140,7 @@ if __name__ == '__main__':
                 keys[ki] += 1
             else:
                 keys[ki] = 1
-                
+
     _, candidates = zip(*sorted(zip(keys.values(), range(2**16)), reverse = True))
     logging.info(candidates)
     print(candidates[:10])
