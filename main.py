@@ -68,8 +68,8 @@ def m2(args):
             else:
                 u_k -= 1
             keys[k] = abs(u_k)
-    keys = [k for k, v in tuple(sorted(keys.items(), key=operator.itemgetter(1), reverse = True))[:100]]
-    keys_m2.append(keys)
+    _, keys = zip(*sorted(zip(keys.values(), range(1 << 16)), reverse = True))
+    keys_m2.append(keys[:100])
 
     
 
@@ -140,8 +140,7 @@ if __name__ == '__main__':
                 keys[ki] += 1
             else:
                 keys[ki] = 1
-    keys = dict(Counter(keys).most_common(10))
-    logging.info(keys)
-    for k, v in keys.items():       # dict(sorted(keys.items(), key=operator.itemgetter(1), reverse=True)[:10]).items():
-        print(f'key = {k}\nstat = {v}')
-        logging.info(f'key = {k}\nstat = {v}')
+                
+    _, candidates = zip(*sorted(zip(keys.values(), range(2**16)), reverse = True))
+    logging.info(candidates)
+    print(candidates[:10])
