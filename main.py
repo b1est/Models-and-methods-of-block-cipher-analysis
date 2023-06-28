@@ -41,9 +41,9 @@ def create_statistical_materials(text_quantity):
         
         
         if sys.platform == "linux" or sys.platform == "linux2":
-            Popen(f"./heys.bin e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate()
+            Popen(["./heys.bin", "e", "01", input_file, output_file], stdin = PIPE, stderr=True).communicate()
         elif sys.platform == "darwin":
-            Popen(f"./heys.bin e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate()
+            Popen(["./heys.bin", "e", "01", input_file, output_file], stdin = PIPE, stderr=True).communicate()
         elif sys.platform == "win32":
             Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate('\n'.encode())
 
@@ -57,6 +57,7 @@ def read(text_quantity):
 @timeit(display_args=False)
 def m2(args):
     keys = dict()
+    texts = read(config.texts)
     alpha, beta = args
     for k in range(1 << 16):
         u_k = 0
@@ -118,7 +119,6 @@ if __name__ == '__main__':
     if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
         create_statistical_materials(config.texts)
     
-    texts = Manager().list(read(config.texts))
     num_processes = cpu_count() - 4
     
     
