@@ -57,7 +57,7 @@ def read(text_quantity):
 @timeit(display_args=False)
 def m2(args):
     keys = dict()
-    alpha, beta = args
+    alpha, beta, keys_m2, T = args
     for k in range(1 << 16):
         u_k = 0
         for x, y in T:
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     if len(approximations) > 300:
         approximations = approximations[:300]
         
-    appr_list_ab = [(ab[0], ab[1]) for ab, p in approximations]
+    
 
     if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
         create_statistical_materials(config.texts)
@@ -123,6 +123,8 @@ if __name__ == '__main__':
     
     keys_m2 = Manager().list()
     T = Manager().list(texts)
+
+    appr_list_ab = [(ab[0], ab[1], keys_m2, T) for ab, p in approximations]
     if not Path('./saves/keys_m2.pkl').exists():
         
         with Pool(processes=num_processes) as pool:
