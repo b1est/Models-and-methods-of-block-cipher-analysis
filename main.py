@@ -1,5 +1,4 @@
 from heys import HeysCipher
-from collections import Counter
 from config import Config
 from multiprocessing import cpu_count, Pool, Manager
 from helpers import timeit
@@ -10,13 +9,10 @@ from pathlib import Path
 from linear_approximations_search import linear_approximations_search as linsearch
 from linear_approximations_search import scalar_mul as mul
 from subprocess import Popen, PIPE 
-import operator
 
 logging.basicConfig(filename='lab_logs.log', format='%(message)s', level=logging.INFO)
 
-
 config = Config()
-
 
 @timeit(display_args=True)
 def linsearch_worker(alpha):
@@ -34,10 +30,12 @@ def create_statistical_materials(text_quantity):
     for text in range(text_quantity):
         input_file = Path(f'./saves/materials/pt_{text}.bin')
         output_file = Path(f'./saves/materials/ct_{text}.bin')
-
-
         with open(input_file, 'wb') as file:
             file.write(int(text).to_bytes(2, 'little'))
+            file.write(int(text).to_bytes(2, 'little'))
+        
+        
+            file.write(int(text).to_bytes(2, 'little')) 
         
         
         if sys.platform == "linux" or sys.platform == "linux2":
@@ -47,21 +45,33 @@ def create_statistical_materials(text_quantity):
         elif sys.platform == "win32":
             Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate('\n'.encode())
 
-def read(text_quantity):
-    texts = [(int.from_bytes(open(f'./saves/materials/pt_{text}.bin', 'rb').read(), 'little'), int.from_bytes(open(f'./saves/materials/ct_{text}.bin', 'rb').read(), 'little')) for text in range(text_quantity)]
-    
-    return texts
+def read(text_quantity, texts):
+    for text in range(text_quantity):
+        texts.append((int.from_bytes(open(f'./saves/materials/pt_{text}.bin', 'rb').read(), 'little'), int.from_bytes(open(f'./saves/materials/ct_{text}.bin', 'rb').read(), 'little')))
 
-
+def get_last_created_file_and_ab(path: Path or str):
+    if isinstance(path, str):
+        path = Path(path)
+    dir_list = os.listdir(path)
+    if dir_list == []:
+        return None
+    if dir_list:
+        date_list = []
+        for x in dir_list:
+            date_list.append([x, os.path.getctime(path/f'{x}')])
+        sort_date_list = sorted(date_list, key=lambda x: x[1], reverse=True)
+        last_file = sort_date_list[0][0]
+        ab = [tuple(map(int, file[:-4].split('-'))) for file in dir_list]
+        return ab, last_file
+    return None
 
 @timeit(display_args=False)
 def m2(args):
     keys = dict()
-    T = read(config.texts)
-    alpha, beta, keys_m2 = args
+    alpha, beta, keys_m2, texts = args
     for k in range(1 << 16):
         u_k = 0
-        for x, y in T:
+        for x, y in texts:
             x1 = HeysCipher(config.s_block, config.s_block_rev).round(x, k)
             if mul(alpha, x1)^mul(beta, y) == 0:
                 u_k += 1
@@ -69,22 +79,22 @@ def m2(args):
                 u_k -= 1
             keys[k] = abs(u_k)
     _, keys = zip(*sorted(zip(keys.values(), range(1 << 16)), reverse = True))
-    keys_m2.append(keys[:100])
-
-    
+    keys_m2.append(keys[:100]) 
 
 if __name__ == '__main__':
     if not Path('./saves/approximations').is_dir():
         Path("./saves/approximations").mkdir(parents=True)
     if not Path('./saves/materials').is_dir():
         Path("./saves/materials").mkdir(parents=True)
+    if not Path('./saves/m2').is_dir():
+        Path("./saves/m2").mkdir(parents=True)
     if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
         os.system('chmod +x heys.bin')
     if not os.listdir(Path('./saves/approximations')):
         approximations = list()
         alpha_array = [alpha[1] for alpha in [([alpha >> 4 * i & 0xf for i in range(4)], alpha) for alpha in range(1, 1 << 16)] if alpha[0].count(0)>=3]
         if len(alpha_array) >= cpu_count():
-            num_processes = cpu_count() - 2
+            num_processes = cpu_count()
         else:
             num_processes = len(alpha_array)
 
@@ -109,21 +119,35 @@ if __name__ == '__main__':
             with open(Path(f'./saves/approximations/all.pkl'), 'wb') as f:
                     pickle.dump(approximations, f)
     
-    approximations = sorted(approximations, key = lambda x: x[1], reverse = True)
+    approximations = [(ab[0], ab[1]) for ab, p in sorted(approximations, key = lambda x: x[1], reverse = True)]
+    
+    res = get_last_created_file_and_ab(Path('./saves/m2'))
+
     
     if len(approximations) > 300:
         approximations = approximations[:300]
-        
-    
+
+    last_file = None   
+    if res != None:
+        ab, last_file = res
+        for i in ab:
+            approximations.remove(i)
 
     if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
         create_statistical_materials(config.texts)
-    
-    num_processes = cpu_count()-2
-    
-    keys_m2 = Manager().list()
 
-    appr_list_ab = [(ab[0], ab[1], keys_m2) for ab, p in approximations]
+    texts = Manager().list()
+
+    read(config.texts, texts)
+
+    num_processes = cpu_count()
+    
+    if last_file:
+        keys_m2 = Manager().list(last_file)
+    else:
+        keys_m2 = Manager().list()
+    
+    appr_list_ab = [(ab[0], ab[1], keys_m2, texts) for ab in approximations]
     if not Path('./saves/keys_m2.pkl').exists():
         
         with Pool(processes=num_processes) as pool:
@@ -145,6 +169,6 @@ if __name__ == '__main__':
             else:
                 keys[ki] = 1
 
-    _, candidates = zip(*sorted(zip(keys.values(), range(2**16)), reverse = True))
+    _, candidates = zip(*sorted(zip(keys.values(), range(1 << 16)), reverse = True))
     logging.info(candidates)
     print(candidates[:10])
