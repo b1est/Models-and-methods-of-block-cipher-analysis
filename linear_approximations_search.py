@@ -42,8 +42,4 @@ def linear_approximations_search(alpha, r = 6, p = 0.0001):
             for pp in LPs[bi]:
                 GammaIndex[pp] = GammaIndex.get(pp, 0) + LPs[bi][pp] * Gamma[t-1][bi]
         Gamma[t].update({HeysCipher(config.s_block, config.s_block_rev).L(beta): GammaIndex[beta] for beta in GammaIndex if GammaIndex[beta] > p})
-    print(Gamma[-1])
     return Gamma[-1]
-
-if __name__ == "__main__":
-    linear_approximations_search(80)
