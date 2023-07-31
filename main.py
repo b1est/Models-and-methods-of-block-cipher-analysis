@@ -45,9 +45,11 @@ def create_statistical_materials(text_quantity):
         elif sys.platform == "win32":
             Popen(f"Heys e 01 {input_file} {output_file}", stdin = PIPE, stderr=True).communicate('\n'.encode())
 
-def read(text_quantity, texts):
+def read(text_quantity):
+    texts = []
     for text in range(text_quantity):
         texts.append((int.from_bytes(open(f'./saves/materials/pt_{text}.bin', 'rb').read(), 'little'), int.from_bytes(open(f'./saves/materials/ct_{text}.bin', 'rb').read(), 'little')))
+    return texts
 
 def get_last_created_file_and_ab(path: Path or str):
     if isinstance(path, str):
@@ -136,9 +138,7 @@ if __name__ == '__main__':
     if len(os.listdir(Path('./saves/materials')))//2 != config.texts:
         create_statistical_materials(config.texts)
 
-    texts = Manager().list()
-
-    read(config.texts, texts)
+    texts = read(config.texts)
 
     num_processes = cpu_count()
     
