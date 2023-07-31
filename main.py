@@ -96,7 +96,7 @@ if __name__ == '__main__':
         approximations = list()
         alpha_array = [alpha[1] for alpha in [([alpha >> 4 * i & 0xf for i in range(4)], alpha) for alpha in range(1, 1 << 16)] if alpha[0].count(0)>=3]
         if len(alpha_array) >= cpu_count():
-            num_processes = cpu_count()
+            num_processes = max(cpu_count()-2, 1)
         else:
             num_processes = len(alpha_array)
 
@@ -140,8 +140,7 @@ if __name__ == '__main__':
 
     texts = read(config.texts)
 
-    num_processes = cpu_count()
-    
+    num_processes = max(cpu_count()-2, 1)
     if last_file:
         keys_m2 = Manager().list(last_file)
     else:
