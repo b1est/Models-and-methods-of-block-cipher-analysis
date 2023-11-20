@@ -1,8 +1,9 @@
 import random
 import config
 
+
 class HeysCipher:
-    def __init__(self, s_block: list, s_block_rev: list, keys: list or int = 0, rounds : int = 6):
+    def __init__(self, s_block: list, s_block_rev: list, keys: list or int = 0, rounds: int = 6):
         self.rounds = rounds
         self.keys = self.expand_key(keys)
         self.s_block = s_block
@@ -34,29 +35,31 @@ class HeysCipher:
                 bit = (num >> (4*j+i)) & 0b1
                 result ^= (bit << (j+4*i))
         return result
-    
+
     def round(self, x: int, key: int) -> int:
         return self.L(self.S(x ^ key, True))
-    
-    def round_rev(self, x: int, key: int) -> int: 
+
+    def round_rev(self, x: int, key: int) -> int:
         return self.S(self.L(x), False) ^ key
 
     def encrypt(self, num: int) -> int:
         for i in range(self.rounds):
             num = self.round(num, self.keys[i])
         return num ^ self.keys[self.rounds]
-    
+
     def decrypt(self, num: int) -> int:
         num ^= self.keys[::-1][0]
         for i in range(1, self.rounds+1):
             num = self.round_rev(num, self.keys[::-1][i])
         return num
 
+
 def generate_keys(rounds):
     return [random.randrange(0, 1 << 16) for _ in range(rounds+1)]
 
+
 if __name__ == "__main__":
-    
+
     config_obj = config.Config()
     s_block = config_obj.s_block
     s_block_rev = config_obj.s_block_rev
@@ -71,7 +74,7 @@ if __name__ == "__main__":
         key_string += hex(k)[2:]
 
     print(f"Key = {key_string}, Message = {hex(plain_text)[2:]}")
-   
+
     cipher = HeysCipher(s_block, s_block_rev, keys, rounds)
 
     encrypted = cipher.encrypt(plain_text)
