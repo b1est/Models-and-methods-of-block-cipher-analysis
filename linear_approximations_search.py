@@ -37,7 +37,7 @@ def LP_a(alpha):
 
 
 @timeit(display_args=True)
-def linear_approximations_search(alpha, r=6, p=0.0001):
+def linear_approximations_search(alpha, r=6, p=0.00015):
     Gamma = [dict() for i in range(r)]
     Gamma[0].update({alpha: 1})
     LPs = dict()

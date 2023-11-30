@@ -13,7 +13,7 @@ from subprocess import Popen, PIPE
 from math import ceil
 from collections import Counter
 import time
-
+import pandas as pd
 
 logging.basicConfig(filename='lab_logs.log',
                     format='%(message)s', level=logging.INFO)
@@ -35,8 +35,8 @@ def linsearch_worker(alpha):
 
 
 @timeit(display_args=False)
-def get_approximations(save_path: Path, num_of_appr=None):
-    approximations_file = save_path / "approximations.pkl"
+def get_approximations(saves_path: Path, num_of_appr=None):
+    approximations_file = saves_path / "approximations.pkl"
     saves_approximations_path = saves_path / 'approximations'
 
     if not saves_approximations_path.is_dir():
@@ -80,13 +80,15 @@ def get_approximations(save_path: Path, num_of_appr=None):
         approximations = approximations[:num_of_appr]
         config.texts = int(1 / approximations[-1][1])
 
+    approximations_table = pd.DataFrame([(hex(ab[0])[2:].zfill(4), hex(ab[1])[2:].zfill(4), p) for ab, p in approximations], columns=["alpha (hex)", "beta (hex)", "linear potentials"])
+    approximations_table.to_csv(Path('./saves/approximations.csv'), index=False)
     approximations = [(ab[0], ab[1]) for ab, p in approximations]
 
     return approximations
 
 
-def create_statistical_materials(save_path: Path):
-    texts_path = save_path / "texts.pkl"
+def create_statistical_materials(saves_path: Path):
+    texts_path = saves_path / "texts.pkl"
     saves_materials_path = saves_path / 'materials'
     if not saves_materials_path.is_dir():
         saves_materials_path.mkdir(parents=True)
@@ -164,13 +166,12 @@ def m2(params, approximations):
         with open(m2_file_path, 'rb') as f:
             return pickle.load(f)
     elif uk_file_path.exists():
+        keys = []
         with open(uk_file_path, 'rb') as f:
             uk = pickle.load(f)
         for a, b in approximations:
-            k = keys[(a, b)]
-            _, k = zip(*sorted(k, reverse=True))
-            keys[(a, b)] = k[:100]
-        keys = list(keys.values())
+            _, k = zip(*sorted(uk[(a, b)], reverse=True))
+            keys.append(k[:100])
         with open(m2_file_path, 'wb') as f:
             pickle.dump(keys, f)
         return keys
@@ -226,6 +227,8 @@ if __name__ == '__main__':
 
     logging.info(f'Attack is successful, time: {total_time:.4f} seconds')
     print(f'Attack is successful, time: {total_time:.4f} seconds')
+    print(candidates[:10])
+    print(statistic[:10])
     logging.info(candidates[:10])
     logging.info(statistic[:10])
 
